@@ -523,7 +523,16 @@ static void WINAPI Load(HMODULE hModule) {
 		readfile.close();
 	}
 
-	checkForUpdate();
+	// ===== [AI] Отключение оригинального автообновления: НАЧАЛО =====
+
+	// Оригинальная логика crashes.asi v2.4:
+	// checkForUpdate();
+
+	// Автообновление отключено, так как данная сборка является
+	// модифицированной версией v2.4 и не должна заменяться
+	// официальным crashes.asi из репозитория Whitetigerswt.
+
+	// ===== [AI] Отключение оригинального автообновления: КОНЕЦ =====
 	
 	bool laststate = false;
 	int previousbrightness = -1;
