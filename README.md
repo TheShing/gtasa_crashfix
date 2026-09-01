@@ -1,4 +1,4 @@
-# gtasa_crashfix v2.4 — Modified version
+# crashes v2.4 — Modified version
 
 ## Русский
 
