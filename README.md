@@ -52,7 +52,7 @@ Source code analysis, debugging assistance and implementation guidance: **ChatGP
 
 ---
 
-## Оригинальное описание / Original description
+# Оригинальное описание / Original description
 
 Fix GTA:SA Bugs ASI
 =============
