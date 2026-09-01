@@ -334,9 +334,18 @@ static void WINAPI Load(HMODULE hModule) {
 		MemPut < float > ( 0x712447, 13.f + 10.f );
 		MemPut < float > ( 0x71244c, 4.f  + 10.f );
 
-		// NOP interior music
+		// ===== [AI] Настройка музыки в интерьерах: НАЧАЛО =====
+
+		// Оригинальная логика crashes.asi v2.4:
+		/*
 		MemSet ( (LPVOID)0x508450, 0x90, 6 );
 		MemSet ( (LPVOID)0x508817, 0x90, 6 );
+		*/
+
+		// Отключение музыки теперь управляется параметром
+		// "interiormusic" в crashes.cfg.
+
+		// ===== [AI] Настройка музыки в интерьерах: КОНЕЦ =====
 
 		// NOP clouds
 		MemPut < BYTE > ( 0x716380, 0xC3 );
@@ -428,6 +437,13 @@ static void WINAPI Load(HMODULE hModule) {
 				SetHeatHazeEnabled(enabled == 1 ? true : false);
 			} else if(type.compare("sound") == 0) {
 				if(enabled == 0) MemPut < int > (0x507750, 0xC3);
+			// ===== [AI] Настройка музыки в интерьерах: НАЧАЛО =====
+			} else if(type.compare("interiormusic") == 0) {
+				if (enabled == 0) {
+					MemSet((LPVOID)0x508450, 0x90, 6);
+					MemSet((LPVOID)0x508817, 0x90, 6);
+				}
+			// ===== [AI] Настройка музыки в интерьерах: КОНЕЦ =====
 			} else if(type.compare("vehiclelighting") == 0) {
 				if(enabled == 0) MemPut < BYTE > (0x5D9A8F, 0);
 			} else if(type.compare("specularvehicle") == 0) {
@@ -466,6 +482,9 @@ static void WINAPI Load(HMODULE hModule) {
 		ofile << "shadows 0" << endl;
 		ofile << "heathaze 0" << endl;
 		ofile << "sound 1" << endl;
+		// ===== [AI] Настройка музыки в интерьерах: НАЧАЛО =====
+		ofile << "interiormusic 1" << endl;
+		// ===== [AI] Настройка музыки в интерьерах: КОНЕЦ =====
 		ofile << "vehiclelighting 1" << endl;
 		ofile << "specularvehicle 1" << endl;
 		ofile << "targetblip 1" << endl;
@@ -490,6 +509,9 @@ static void WINAPI Load(HMODULE hModule) {
 		readfile << "shadows - enable or disables volumetric shadows, AKA the shitty shadows that lag even the best of PC's. run your game on very high FX quality without those shadows that looked ugly, and lagged your game anyway!" << endl;
 		readfile << "heathaze - enable or disable heat haze." << endl;
 		readfile << "sound - set to 0 to disable all ingame sound." << endl;
+		// ===== [AI] Настройка музыки в интерьерах: НАЧАЛО =====
+		readfile << "interiormusic - set to 1 to enable original GTA:SA interior music, set to 0 to disable interior music." << endl;
+		// ===== [AI] Настройка музыки в интерьерах: КОНЕЦ =====
 		readfile << "vehiclelighting - set to 0 to disable vehicle lighting." << endl;
 		readfile << "specularvehicle - set to 0 to disable specular vehicle lighting." << endl;
 		readfile << "targetblip - set to 0 to disable target blip above peds heads when aiming at them." << endl;

@@ -110,12 +110,54 @@ DWORD	dwTmp											= 0;
 DWORD	dwTmpEcx										= 0;
 DWORD	dwTmpEax										= 0;
 
+// ===== [AI] Правки фикса бага перелезания: НАЧАЛО =====
+
+#define TASK_SIMPLE_CLIMB_ID 254
+#define FUNC_FindActiveTaskByType 0x681740
+
+#define WEAPON_FALL_ID 54
+#define PED_DAMAGE_CALC_WEAPON_OFFSET 0x0C
+
+typedef void* (__thiscall* FindActiveTaskByType_t)(void* taskManager, int taskType);
+
+DWORD g_dwSuppressClimbFallDamage = 0;
+
+bool IsPlayerClimbing()
+{
+	DWORD player = *(DWORD*)0xB6F5F0;
+	if (!player)
+		return false;
+
+	DWORD intelligence = *(DWORD*)(player + 0x47C);
+	if (!intelligence)
+		return false;
+
+	void* taskManager = (void*)(intelligence + 0x4);
+
+	FindActiveTaskByType_t FindActiveTaskByType =
+		(FindActiveTaskByType_t)FUNC_FindActiveTaskByType;
+
+	return FindActiveTaskByType(taskManager, TASK_SIMPLE_CLIMB_ID) != NULL;
+}
+
+bool IsFallDamage(DWORD damageCalculator)
+{
+	if (!damageCalculator)
+		return false;
+
+	return *(DWORD*)(damageCalculator + PED_DAMAGE_CALC_WEAPON_OFFSET) == WEAPON_FALL_ID;
+}
+
+// ===== [AI] Правки фикса бага перелезания: КОНЕЦ =====
+
 void _declspec(naked) HOOK_FixClimbBug () { 
 
 	_asm mov [dwTmp],edx
 	_asm mov [dwTmpEcx],ecx
 	_asm mov [dwTmpEax],eax
 
+	// ===== [AI] Оригинальная логика FixClimbBug: НАЧАЛО =====
+	/*
 	g_dwPlayer = *(int*)0xB6F5F0;
 
 	if(*(BYTE*)(g_dwPlayer + 0x46D) == 34 || *(BYTE*)(g_dwPlayer + 0x15C) != 0) {
@@ -127,16 +169,43 @@ void _declspec(naked) HOOK_FixClimbBug () {
 			jmp		RETURN_FixClimbBug
 		}
 	}
+	*/
+	// ===== [AI] Оригинальная логика FixClimbBug: КОНЕЦ =====
 
 
+	// ===== [AI] Правки фикса бага перелезания: НАЧАЛО =====
+
+	g_dwSuppressClimbFallDamage = 0;
+
+	if (IsPlayerClimbing() && IsFallDamage(dwTmpEcx)) {
+
+		g_dwSuppressClimbFallDamage = 1;
+
+		_asm {
+			mov		edx, [dwTmp]
+				mov		eax, [dwTmpEax]
+				mov		ecx, [dwTmpEcx]
+				call	dwDontSendDmgToServer
+				mov[g_dwSuppressClimbFallDamage], 0
+				jmp		RETURN_FixClimbBug
+		}
+	}
+
+	// ===== [AI] Правки фикса бага перелезания: КОНЕЦ =====
+	
+	// ОРИГИНАЛЬНАЯ обработка всего остального урона.
+	// Этот блок оставляем активным.
 	_asm {
-		mov		edx,[dwTmp]
-		mov		eax,[dwTmpEax]
-		mov		ecx,[dwTmpEcx]
-		call	dwSendDmgToServer
-		jmp		RETURN_FixClimbBug
+		mov		edx, [dwTmp]
+			mov		eax, [dwTmpEax]
+			mov		ecx, [dwTmpEcx]
+			call	dwSendDmgToServer
+			jmp		RETURN_FixClimbBug
 	}
 }
+
+
+	
 
 #define HOOKPOS_FixClimbBug2                            0x04B5AE5
 #define HOOKSIZE_FixClimbBug2                           6
@@ -169,6 +238,8 @@ void _declspec(naked) HOOK_FixClimbBug2 () {
 	}
 
 
+	// ===== [AI] Оригинальная логика FixClimbBug2: НАЧАЛО =====
+	/*
 	g_dwPlayer = *(int*)0xB6F5F0;
 
 	if(*(BYTE*)(g_dwPlayer + 0x46D) == 34 || *(BYTE*)(g_dwPlayer + 0x15C) != 0) {
@@ -176,6 +247,18 @@ void _declspec(naked) HOOK_FixClimbBug2 () {
 			jmp dwfixClimbBugAlt
 		}
 	}
+	*/
+	// ===== [AI] Оригинальная логика FixClimbBug2: КОНЕЦ =====
+
+	// ===== [AI] Правки фикса бага перелезания: НАЧАЛО =====
+
+	if (g_dwSuppressClimbFallDamage != 0) {
+		_asm {
+			jmp dwfixClimbBugAlt
+		}
+	}
+
+	// ===== [AI] Правки фикса бага перелезания: КОНЕЦ =====
 
 	_asm {
 		mov		ecx,[dwTmpEcx]

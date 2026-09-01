@@ -613,6 +613,33 @@ void _declspec(naked) HOOK_CrashFix_Misc20 ()
 #define HOOKPOS_CrashFix_Misc21                             0x648EE0
 #define HOOKSIZE_CrashFix_Misc21                            7
 DWORD RETURN_CrashFix_Misc21 =                              0x648EE7;
+
+// ===== [AI] Правки CrashFix_Misc21: НАЧАЛО =====
+
+bool _cdecl SafeFinishCarFallOutTask(void* pTask)
+{
+	if (!pTask)
+		return false;
+
+	__try
+	{
+		// CTaskSimpleCarFallOut:
+		// +0x08 = m_HasFinished
+		// +0x0C = m_Anim
+
+		*(BYTE*)((DWORD)pTask + 0x08) = 1;
+		*(DWORD*)((DWORD)pTask + 0x0C) = 0;
+
+		return true;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		return false;
+	}
+}
+
+// ===== [AI] Правки CrashFix_Misc21: КОНЕЦ =====
+
 void _declspec(naked) HOOK_CrashFix_Misc21 ()
 {
 #if TEST_CRASH_FIXES
@@ -640,8 +667,26 @@ void _declspec(naked) HOOK_CrashFix_Misc21 ()
         jmp     RETURN_CrashFix_Misc21
 
     cont:
-        CRASH_AVERTED( 21 )
-        retn
+		// ===== [AI] Оригинальная логика CrashFix_Misc21: НАЧАЛО =====
+		/*
+		CRASH_AVERTED( 21 )
+		retn
+		*/
+		// ===== [AI] Оригинальная логика CrashFix_Misc21: КОНЕЦ =====
+
+		// ===== [AI] Правки CrashFix_Misc21: НАЧАЛО =====
+
+		CRASH_AVERTED(21)
+
+			// Второй аргумент FinishAnimFallOutCB — указатель
+			// на CTaskSimpleCarFallOut.
+			push[esp + 8]
+			call    SafeFinishCarFallOutTask
+			add     esp, 4
+
+			retn
+
+			// ===== [AI] Правки CrashFix_Misc21: КОНЕЦ =====
     }
 }
 
@@ -1254,7 +1299,7 @@ void InitHooks_CrashFixHacks ()
     EZHookInstall ( CrashFix_Misc18 );
     EZHookInstall ( CrashFix_Misc19 );
     EZHookInstall ( CrashFix_Misc20 );
-    EZHookInstall ( CrashFix_Misc21 );
+	EZHookInstall ( CrashFix_Misc21 );
     EZHookInstall ( CrashFix_Misc22 );
     EZHookInstall ( CrashFix_Misc23 );
     EZHookInstall ( CrashFix_Misc24 );
