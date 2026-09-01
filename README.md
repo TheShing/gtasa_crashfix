@@ -54,9 +54,6 @@ Source code analysis, debugging assistance and implementation guidance: **ChatGP
 
 # Оригинальное описание / Original description
 
-Fix GTA:SA Bugs ASI
-=============
-
 This mod does the following things:
 
 - Fixes aproxamently 30 crashes that can occur in GTA:SA.
