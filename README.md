@@ -21,7 +21,7 @@
 - Отключено автоматическое обновление `crashes.asi` из оригинального репозитория.  
   Модифицированная версия больше не может быть автоматически заменена оригинальной сборкой.
 
-### Модифицированная версия
+### Работали над модифицированной версией
 
 Модификация, тестирование и проверка исправлений: **TheShing**
 
@@ -50,7 +50,7 @@ This version is based on the v2.4 release and contains several fixes and minor c
 - Disabled automatic updates of `crashes.asi` from the original repository.  
   The modified version can no longer be automatically replaced by the original build.
 
-### Modified version
+### Contributors to the modified version
 
 Modifications, testing and verification of the fixes: **TheShing**
 
